@@ -1,0 +1,1 @@
+import"node:module";import*as r from"fs";import*as o from"worker_threads";import{__webpack_require__ as e}from"./rslib-runtime.mjs";e.add({fs(o){o.exports=r},worker_threads(r){r.exports=o}});
