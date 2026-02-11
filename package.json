@@ -7,9 +7,10 @@
     "test": "node tests",
     "test:coverage": "node --experimental-test-coverage tests",
     "clean": "rm -rf build coverage",
+    "build:npm": "BUILD_TARGET=npm npm run build",
     "release": "npx release-it --verbose",
     "coverage": "npm run coverage:unit && npm run coverage:report",
-    "np:npm": "npm run clean && BUILD_TARGET=npm npm run build -- npm && npm publish --registry=https://registry.npmjs.org/ build/"
+    "np:npm": "npm run clean && BUILD_TARGET=npm npm run build && npm publish --registry=https://registry.npmjs.org/ build/"
   },
   "engines": {
     "node": ">=22"
@@ -18,13 +19,11 @@
     "dist"
   ],
   "main": "dist/index.js",
-  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
+      "default": "./dist/index.js"
     }
   },
   "repository": {
