@@ -9,6 +9,7 @@
     "clean": "rm -rf build coverage",
     "build:npm": "BUILD_TARGET=npm npm run build",
     "release": "npx release-it --verbose",
+    "release:dry": "npm run release -- --dry-run",
     "coverage": "npm run coverage:unit && npm run coverage:report",
     "np:npm": "npm run clean && BUILD_TARGET=npm npm run build && npm publish --registry=https://registry.npmjs.org/ build/"
   },
