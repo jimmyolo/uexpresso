@@ -2,7 +2,7 @@
 
 import e from "express";
 // import uws from 'uWebSockets.js';
-import uws from '@jimmyolo/uws-alma';
+import uws from '@jimmyolo/uws.js';
 
 declare namespace express {
 
