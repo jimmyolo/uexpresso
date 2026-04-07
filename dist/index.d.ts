@@ -50,10 +50,10 @@ declare namespace express {
 
   // export import Application = e.Application;
   export interface Application extends Omit<e.Application, 'listen' | 'set' | 'enable' | 'disable' | 'enabled' | 'disabled'> {
-    listen(port?: number, hostname?: string, callback?: (token: any) => void): uws.TemplatedApp;
-    listen(port?: number, callback?: (token: any) => void): uws.TemplatedApp;
-    listen(callback?: (token: any) => void): uws.TemplatedApp;
-    listen(socketPath: string, callback?: (token: any) => void): uws.TemplatedApp;
+    listen(port?: number, hostname?: string, callback?: (token: any) => void): Application;
+    listen(port?: number, callback?: (token: any) => void): Application;
+    listen(callback?: (token: any) => void): Application;
+    listen(socketPath: string, callback?: (token: any) => void): Application;
 
     readonly uwsApp: uws.TemplatedApp;
 
