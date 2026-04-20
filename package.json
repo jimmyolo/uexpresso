@@ -1,6 +1,6 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.3.2",
+  "version": "2.3.3",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "prepare": "npx husky",
@@ -37,11 +37,11 @@
   },
   "author": "jimmyolo <victor0801x@gmail.com>",
   "optionalDependencies": {
-    "ultimate-express": "2.0.17",
-    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.63.0"
+    "ultimate-express": "2.1.0",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.64.0"
   },
   "dependencies": {
-    "@jimmyolo/uws.js": "github:jimmyolo/uws.js#semver:v20.63.0-alma.1",
+    "@jimmyolo/uws.js": "github:jimmyolo/uws.js#v20.64.0-alma.1",
     "bytes": "^3.1.2",
     "content-disposition": "^1.1.0",
     "cookie": "^1.1.1",
