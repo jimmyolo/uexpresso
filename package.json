@@ -1,6 +1,6 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.3.3",
+  "version": "2.4.0",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "prepare": "npx husky",
@@ -12,7 +12,9 @@
     "release:dry": "npm run release -- --dry-run --ci",
     "coverage": "npm run coverage:unit && npm run coverage:report",
     "np:npm": "npm run clean && BUILD_TARGET=npm npm run build && npm publish --registry=https://registry.npmjs.org/ build/",
-    "bench:compare": "node benchmark/run.js"
+    "bench": "node benchmark/run.js",
+    "bench:compare": "node benchmark/compare/run.js",
+    "bench:single": "node benchmark/compare/run.js --single"
   },
   "engines": {
     "node": ">=22"
