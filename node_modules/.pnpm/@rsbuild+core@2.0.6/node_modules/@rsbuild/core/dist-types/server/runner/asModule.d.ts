@@ -1,2 +1,0 @@
-import type { Module, SyntheticModule } from 'node:vm';
-export declare const asModule: (moduleExports: unknown, context: Record<string, unknown>, unlinked?: boolean) => Promise<Module | SyntheticModule>;
