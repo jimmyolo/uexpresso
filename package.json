@@ -1,6 +1,6 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "prepare": "npx husky",
@@ -15,7 +15,11 @@
     "bench": "node benchmark/run.js",
     "bench:compare": "node benchmark/compare/run.js",
     "bench:single": "node benchmark/compare/run.js --single",
-    "bench:uws-api": "node benchmark/uws-api/run.js"
+    "bench:uws-api": "node benchmark/uws-api/run.js",
+    "ai:init": "codegraph init -i",
+    "ai:status": "codegraph status",
+    "ai:sync": "codegraph sync",
+    "ai:reindex": "codegraph index --force"
   },
   "engines": {
     "node": ">=22.15.0"
