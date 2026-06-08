@@ -1,11 +1,12 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "prepare": "npx husky",
     "test": "node tests",
     "test:coverage": "node --experimental-test-coverage tests",
+    "test:types": "pnpm run pack && tsd",
     "clean": "rm -rf build coverage",
     "build:npm": "BUILD_TARGET=npm pnpm run build",
     "release": "npx release-it --verbose",

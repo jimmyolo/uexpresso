@@ -76,7 +76,10 @@ declare namespace express {
   export import ErrorRequestHandler = e.ErrorRequestHandler;
 
   // export import Express = e.Express;
-  export type Express = e.Express & express.Application
+  // Omit the methods that Application overrides so vanilla Express's loose
+  // overloads (e.g. `set(setting: string, val: any)`) don't leak back in
+  // through the intersection and defeat Application's narrowed generics.
+  export type Express = Omit<e.Express, 'listen' | 'set' | 'enable' | 'disable' | 'enabled' | 'disabled'> & express.Application
 
   export import Handler = e.Handler;
   export import IRoute = e.IRoute;
