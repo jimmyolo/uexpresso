@@ -60,6 +60,29 @@ declare namespace express {
     | Array<e.RequestHandler | e.ErrorRequestHandler | Application>;
 
   // export import Application = e.Application;
+  export interface InjectOptions {
+    method?: string;
+    /** Path, optionally with a query string. */
+    path?: string;
+    headers?: Record<string, string | number>;
+    /** A Buffer or string is sent as-is; anything else is JSON-encoded. */
+    body?: Buffer | string | object | null;
+    /**
+     * Re-dispatch up to this many redirects and return the final response.
+     * Defaults to 0, which returns the redirect itself. 303 (and 301/302 from a
+     * POST) continues as GET without the body; 307/308 keep both.
+     */
+    followRedirects?: number;
+  }
+
+  export interface InjectResponse {
+    statusCode: number;
+    statusMessage: string;
+    /** Lowercased header names. */
+    headers: Record<string, string>;
+    body: Buffer;
+  }
+
   export interface Application extends Omit<e.Application,
       | 'listen' | 'set' | 'enable' | 'disable' | 'enabled' | 'disabled' | 'use'
       | 'on' | 'once' | 'addListener' | 'removeListener' | 'off' | 'emit'> {
@@ -67,6 +90,12 @@ declare namespace express {
     listen(port?: number, callback?: () => void): this;
     listen(callback?: () => void): this;
     listen(socketPath: string, callback?: () => void): this;
+
+    // Inject a request into the routing stack, through the same route table
+    // and middleware chain a served request uses. For carrying HTTP over
+    // another transport (a WebSocket frame, a queue message) and for driving
+    // the stack in tests without binding a port.
+    inject(options?: InjectOptions): Promise<InjectResponse>;
 
     // Sub-app mounting. A u-expresso `Application` overrides `listen` to return
     // `this` (uWS semantics, not a Node `http.Server`), so it is NOT assignable
