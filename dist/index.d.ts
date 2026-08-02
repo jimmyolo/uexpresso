@@ -7,11 +7,15 @@ import uws from '@jimmyolo/uws.js';
 declare namespace express {
 
   export interface AppOptions {
+    /** Alias for `fsWorkers` */
+    threads?: number;
     fsWorkers?: number;
 
     uwsOptions?: uws.AppOptions;
     uwsApp?: uws.TemplatedApp;
+
     h3?: boolean; /* uws.H3App(), http/3 still in experiment stage... */
+    http3?: boolean; /** Alias for `h3` */
   }
 
   export import json = e.json;
