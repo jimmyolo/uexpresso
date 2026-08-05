@@ -125,6 +125,11 @@ declare namespace express {
     // a union of mixed-arity callables defeats that inference. The path type is
     // `PathParams` inlined — a direct `express-serve-static-core` import is not
     // resolvable from this package under a non-flat node_modules layout.
+    // Re-declaring a method with explicit `e.*` parameter types also takes it out
+    // of what `tests/types-packaging.mjs` can detect: with `@types/express`
+    // unreachable those params inherit an explicit error-`any` rather than no
+    // type at all, which suppresses the TS7006 that fixture depends on. `get` is
+    // left inherited on purpose so the check keeps a handler to bite on.
     use: ((...handlers: e.RequestHandler[]) => this)
       & ((...handlers: RequestHandlerParams[]) => this)
       & ((path: string | RegExp | Array<string | RegExp>, ...handlers: e.RequestHandler[]) => this)
