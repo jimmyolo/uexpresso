@@ -1,11 +1,10 @@
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/express/v4/index.d.ts
 
-import e from "express";
 // import uws from 'uWebSockets.js';
 import uws from '@jimmyolo/uws.js';
+import e from 'express';
 
 declare namespace express {
-
   export interface AppOptions {
     /** Alias for `fsWorkers` */
     threads?: number;
@@ -14,8 +13,8 @@ declare namespace express {
     uwsOptions?: uws.AppOptions;
     uwsApp?: uws.TemplatedApp;
 
-    h3?: boolean; /* uws.H3App(), http/3 still in experiment stage... */
-    http3?: boolean; /** Alias for `h3` */
+    h3?: boolean /* uws.H3App(), http/3 still in experiment stage... */;
+    http3?: boolean /** Alias for `h3` */;
   }
 
   export import json = e.json;
@@ -38,8 +37,10 @@ declare namespace express {
     | 'x-powered-by'
     | 'catch async errors'
     | 'declarative responses'
-    ;
-  export type AppBuiltInSettings = AppBuiltInBooleanSettings
+    | 'route index'
+    | 'native routes';
+  export type AppBuiltInSettings =
+    | AppBuiltInBooleanSettings
     | 'env'
     | 'etag'
     | 'jsonp callback name'
@@ -49,8 +50,7 @@ declare namespace express {
     | 'subdomain offset'
     | 'trust proxy'
     | 'views'
-    | 'view engine'
-    ;
+    | 'view engine';
 
   // Mirrors Express's own `RequestHandlerParams` (request handler, error handler,
   // or a one-level array of either) but also admits a u-expresso `Application`
@@ -87,9 +87,23 @@ declare namespace express {
     body: Buffer;
   }
 
-  export interface Application extends Omit<e.Application,
-      | 'listen' | 'set' | 'enable' | 'disable' | 'enabled' | 'disabled' | 'use'
-      | 'on' | 'once' | 'addListener' | 'removeListener' | 'off' | 'emit'> {
+  export interface Application
+    extends Omit<
+      e.Application,
+      | 'listen'
+      | 'set'
+      | 'enable'
+      | 'disable'
+      | 'enabled'
+      | 'disabled'
+      | 'use'
+      | 'on'
+      | 'once'
+      | 'addListener'
+      | 'removeListener'
+      | 'off'
+      | 'emit'
+    > {
     listen(port?: number, hostname?: string, callback?: () => void): this;
     listen(port?: number, callback?: () => void): this;
     listen(callback?: () => void): this;
@@ -130,14 +144,20 @@ declare namespace express {
     // unreachable those params inherit an explicit error-`any` rather than no
     // type at all, which suppresses the TS7006 that fixture depends on. `get` is
     // left inherited on purpose so the check keeps a handler to bite on.
-    use: ((...handlers: e.RequestHandler[]) => this)
-      & ((...handlers: RequestHandlerParams[]) => this)
-      & ((path: string | RegExp | Array<string | RegExp>, ...handlers: e.RequestHandler[]) => this)
-      & ((path: string | RegExp | Array<string | RegExp>, ...handlers: RequestHandlerParams[]) => this)
-      & e.Application['use'];
+    use: ((...handlers: e.RequestHandler[]) => this) &
+      ((...handlers: RequestHandlerParams[]) => this) &
+      ((
+        path: string | RegExp | Array<string | RegExp>,
+        ...handlers: e.RequestHandler[]
+      ) => this) &
+      ((
+        path: string | RegExp | Array<string | RegExp>,
+        ...handlers: RequestHandlerParams[]
+      ) => this) &
+      e.Application['use'];
 
-    close(cb?:()=>void): this;
-    address(): {port:number} | null;
+    close(cb?: () => void): this;
+    address(): {port: number} | null;
     readonly uwsApp: uws.TemplatedApp;
 
     enabled<T extends AppBuiltInBooleanSettings>(setting: T): boolean;
@@ -148,7 +168,7 @@ declare namespace express {
 
     set<T extends AppBuiltInSettings>(
       setting: T,
-      value: T extends AppBuiltInBooleanSettings ? boolean : any
+      value: T extends AppBuiltInBooleanSettings ? boolean : unknown,
     ): this;
 
     // Typed events. listen() reports a failed bind asynchronously via an
@@ -162,22 +182,31 @@ declare namespace express {
     // its `prependListener` et al. conflict with express's base after the Omit.
     on(event: 'error', listener: (err: Error) => void): this;
     on(event: 'mount', listener: (parent: Application) => void): this;
-    on(event: string | symbol, listener: (...args: any[]) => void): this;
+    on(event: string | symbol, listener: (...args: unknown[]) => void): this;
     once(event: 'error', listener: (err: Error) => void): this;
     once(event: 'mount', listener: (parent: Application) => void): this;
-    once(event: string | symbol, listener: (...args: any[]) => void): this;
+    once(event: string | symbol, listener: (...args: unknown[]) => void): this;
     addListener(event: 'error', listener: (err: Error) => void): this;
     addListener(event: 'mount', listener: (parent: Application) => void): this;
-    addListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    addListener(
+      event: string | symbol,
+      listener: (...args: unknown[]) => void,
+    ): this;
     removeListener(event: 'error', listener: (err: Error) => void): this;
-    removeListener(event: 'mount', listener: (parent: Application) => void): this;
-    removeListener(event: string | symbol, listener: (...args: any[]) => void): this;
+    removeListener(
+      event: 'mount',
+      listener: (parent: Application) => void,
+    ): this;
+    removeListener(
+      event: string | symbol,
+      listener: (...args: unknown[]) => void,
+    ): this;
     off(event: 'error', listener: (err: Error) => void): this;
     off(event: 'mount', listener: (parent: Application) => void): this;
-    off(event: string | symbol, listener: (...args: any[]) => void): this;
+    off(event: string | symbol, listener: (...args: unknown[]) => void): this;
     emit(event: 'error', err: Error): boolean;
     emit(event: 'mount', parent: Application): boolean;
-    emit(event: string | symbol, ...args: any[]): boolean;
+    emit(event: string | symbol, ...args: unknown[]): boolean;
   }
 
   export import CookieOptions = e.CookieOptions;
@@ -186,11 +215,25 @@ declare namespace express {
 
   // export import Express = e.Express;
   // Omit the methods that Application overrides so vanilla Express's loose
-  // overloads (e.g. `set(setting: string, val: any)`) don't leak back in
+  // overloads (e.g. `set(setting: string, val: unknown)`) don't leak back in
   // through the intersection and defeat Application's narrowed generics.
-  export type Express = Omit<e.Express,
-    | 'listen' | 'set' | 'enable' | 'disable' | 'enabled' | 'disabled' | 'use'
-    | 'on' | 'once' | 'addListener' | 'removeListener' | 'off' | 'emit'> & express.Application
+  export type Express = Omit<
+    e.Express,
+    | 'listen'
+    | 'set'
+    | 'enable'
+    | 'disable'
+    | 'enabled'
+    | 'disabled'
+    | 'use'
+    | 'on'
+    | 'once'
+    | 'addListener'
+    | 'removeListener'
+    | 'off'
+    | 'emit'
+  > &
+    express.Application;
 
   export import Handler = e.Handler;
   export import IRoute = e.IRoute;
@@ -209,7 +252,7 @@ declare namespace express {
 
   // additional uws declarations
   // https://unetworking.github.io/uWebSockets.js/generated/index.html
-  export { uws }
+  export {uws};
 }
 
 declare function express(settings?: express.AppOptions): express.Express;

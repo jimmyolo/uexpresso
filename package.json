@@ -1,15 +1,21 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.8.7",
+  "version": "2.8.8",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
-    "prepare": "npx husky",
     "deps:prune-cooldown": "node scripts/prune-release-age-exclude.js",
     "deps:prune-cooldown:check": "node scripts/prune-release-age-exclude.js --check",
     "test": "node tests",
     "test:coverage": "node --experimental-test-coverage tests",
+    "test:route-index": "node scripts/fuzz-route-index.js",
     "test:types": "aube run pack && tsd",
     "test:types:pack": "node tests/types-packaging.mjs",
+    "test:publish-stash": "node tests/publish-stash-guard.mjs",
+    "check": "aubx @biomejs/biome check --no-errors-on-unmatched",
+    "lint": "aube run check -- --staged --linter-enabled=true --formatter-enabled=false",
+    "lint:fix": "aube run lint --fix",
+    "format": "aube run check -- --staged --linter-enabled=false --formatter-enabled=true",
+    "format:fix": "aube run format --fix",
     "clean": "rm -rf build coverage",
     "build:npm": "BUILD_TARGET=npm aube run build",
     "release": "npx release-it --verbose",
@@ -21,6 +27,7 @@
     "bench:single": "node benchmark/compare/run.js --single",
     "bench:body-parser-branch": "node benchmark/compare/bin/bench-body-parser-vs-branch.js",
     "bench:js-layer": "node benchmark/js-layer/run.mjs",
+    "bench:router": "node benchmark/router/run.js",
     "bench:uws-api": "node benchmark/uws-api/run.js",
     "ai:init": "codegraph init -i",
     "ai:status": "codegraph status",
@@ -28,6 +35,9 @@
     "ai:reindex": "codegraph index --force",
     "bench:cross": "bash benchmark/cross/run-container.sh",
     "bench:cross:host": "node benchmark/cross/run.ts"
+  },
+  "lint-staged": {
+    "src/**/*.{js,ts}": "aubx @biomejs/biome check --write --no-errors-on-unmatched"
   },
   "engines": {
     "node": ">=22.15.0"
