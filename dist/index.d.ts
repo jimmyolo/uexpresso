@@ -38,9 +38,13 @@ declare namespace express {
     | 'catch async errors'
     | 'declarative responses'
     | 'route index'
+    | 'header copy skip'
     | 'native routes';
   export type AppBuiltInSettings =
     | AppBuiltInBooleanSettings
+    // `true` (64 MiB budget) or a number (budget in bytes) -- not boolean-only,
+    // so it stays out of AppBuiltInBooleanSettings (same reason as 'trust proxy').
+    | 'sendfile cache'
     | 'env'
     | 'etag'
     | 'jsonp callback name'
