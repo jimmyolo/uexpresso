@@ -161,7 +161,7 @@ declare namespace express {
       e.Application['use'];
 
     close(cb?: () => void): this;
-    address(): {port: number} | null;
+    address(): {port: number} | string | null;
     readonly uwsApp: uws.TemplatedApp;
 
     enabled<T extends AppBuiltInBooleanSettings>(setting: T): boolean;
