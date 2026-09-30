@@ -1,6 +1,6 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.10.0",
+  "version": "2.10.1",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "deps:prune-cooldown": "node scripts/prune-release-age-exclude.js",
@@ -15,14 +15,14 @@
     "test:listen-unix-claim": "node tests/listen-unix-claim.mjs",
     "test:publish-stash": "node tests/publish-stash-guard.mjs",
     "test:publish-manifest": "node tests/publish-manifest-guard.mjs",
-    "check": "aubx @biomejs/biome check --no-errors-on-unmatched",
+    "check": "aube exec biome check --no-errors-on-unmatched",
     "lint": "aube run check -- --staged --linter-enabled=true --formatter-enabled=false",
     "lint:fix": "aube run lint --fix",
     "format": "aube run check -- --staged --linter-enabled=false --formatter-enabled=true",
     "format:fix": "aube run format --fix",
     "clean": "rm -rf build coverage",
     "build:npm": "BUILD_TARGET=npm aube run build",
-    "release": "npx release-it --verbose",
+    "release": "aube dlx release-it@21.1.0 --verbose",
     "release:dry": "aube run release -- --dry-run --ci",
     "coverage": "aube run coverage:unit && aube run coverage:report",
     "np:npm": "aube run clean && BUILD_TARGET=npm aube run build && aube publish --dir build --registry=https://registry.npmjs.org/",
@@ -41,7 +41,7 @@
     "bench:cross:host": "node benchmark/cross/run.ts"
   },
   "lint-staged": {
-    "src/**/*.{js,ts}": "aubx @biomejs/biome check --write --no-errors-on-unmatched"
+    "src/**/*.{js,ts}": "aube exec biome check --write --no-errors-on-unmatched"
   },
   "engines": {
     "node": ">=22.15.0"

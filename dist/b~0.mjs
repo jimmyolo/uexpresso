@@ -1,1 +1,0 @@
-import{__webpack_require__ as e}from"./rslib-runtime~0.mjs";import{createRequire as o}from"node:module";let r=o(import.meta.url);e.add({"node:fs"(e){e.exports=r("node:fs")},"node:worker_threads"(e){e.exports=r("node:worker_threads")}});

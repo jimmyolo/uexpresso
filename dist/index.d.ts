@@ -23,6 +23,25 @@ declare namespace express {
   export import static = e.static;
   export import urlencoded = e.urlencoded;
 
+  /** @experimental Fork-only. */
+  export interface MicrocacheOptions {
+    /** Seconds. The first request after this runs the handler again. */
+    lowerExpiry: number;
+    /** Seconds, at least `lowerExpiry`. An entry is never served after this. */
+    upperExpiry: number;
+    /** Default 1000. The oldest entry is evicted first. */
+    maxEntries?: number;
+  }
+  /**
+   * @experimental Fork-only. Stores a GET 200 response by URL and replays it.
+   * Middleware before it runs on every request; handlers after it are skipped
+   * on a hit. The key is the URL alone: a request with Authorization, or a
+   * response with Set-Cookie, Vary, or a private/no-store/no-cache
+   * Cache-Control, is never stored. Use only on content that is the same for
+   * every caller.
+   */
+  export function microcache(options: MicrocacheOptions): e.RequestHandler;
+
   export import application = e.application;
   export import request = e.request;
   export import response = e.response;
@@ -161,7 +180,7 @@ declare namespace express {
       e.Application['use'];
 
     close(cb?: () => void): this;
-    address(): {port: number} | string | null;
+    address(): {address: string; family: string; port: number} | string | null;
     readonly uwsApp: uws.TemplatedApp;
 
     enabled<T extends AppBuiltInBooleanSettings>(setting: T): boolean;
@@ -257,6 +276,31 @@ declare namespace express {
   // additional uws declarations
   // https://unetworking.github.io/uWebSockets.js/generated/index.html
   export {uws};
+}
+
+// Express.Response is the augmentation point core.Response extends, so this
+// reaches `res` in every handler. It also lands on vanilla express types in a
+// project that loads both, where the field is undefined at runtime; optional
+// keeps that honest.
+declare global {
+  namespace Express {
+    interface Response {
+      /**
+       * Fork-only. `true` while a write is in flight: from the moment the
+       * chunk reaches uWS until uWS accepts it without backpressure, chunked
+       * or with Content-Length alike. Writes queued behind it are not accepted
+       * either. Below the high-water mark `write()` returns `true` even while
+       * the chunk is held, so a write was accepted only when
+       * `res.write(chunk) && res.writingChunk !== true`.
+       *
+       * To wait, pass a callback to `write()`: it runs once the chunk is
+       * accepted. `'drain'` does not fire after a `write()` that returned
+       * `true`. If the client aborts, the flag stays `true` and the callback
+       * never runs, so also stop on `'close'`.
+       */
+      writingChunk?: boolean;
+    }
+  }
 }
 
 declare function express(settings?: express.AppOptions): express.Express;
