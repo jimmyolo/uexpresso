@@ -1,6 +1,6 @@
 {
   "name": "@jimmyolo/u-expresso",
-  "version": "2.10.1",
+  "version": "2.10.2",
   "description": "☄️ fast http server, based on μWebSockets.js. save your time ☕",
   "scripts": {
     "deps:prune-cooldown": "node scripts/prune-release-age-exclude.js",
@@ -15,6 +15,8 @@
     "test:listen-unix-claim": "node tests/listen-unix-claim.mjs",
     "test:publish-stash": "node tests/publish-stash-guard.mjs",
     "test:publish-manifest": "node tests/publish-manifest-guard.mjs",
+    "test:claude-hooks": "node tests/claude-hooks-guard.mjs",
+    "test:deps-docs": "node tests/deps-doc-guard.mjs",
     "check": "aube exec biome check --no-errors-on-unmatched",
     "lint": "aube run check -- --staged --linter-enabled=true --formatter-enabled=false",
     "lint:fix": "aube run lint --fix",
