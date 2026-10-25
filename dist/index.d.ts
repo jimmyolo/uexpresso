@@ -1,5 +1,8 @@
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/express/v4/index.d.ts
 
+import type {Worker as ClusterWorker} from 'node:cluster';
+import type {Worker as ThreadsWorker} from 'node:worker_threads';
+
 // import uws from 'uWebSockets.js';
 import uws from '@jimmyolo/uws.js';
 import e from 'express';
@@ -40,7 +43,237 @@ declare namespace express {
    * Cache-Control, is never stored. Use only on content that is the same for
    * every caller.
    */
-  export function microcache(options: MicrocacheOptions): e.RequestHandler;
+  export function microcache(options: MicrocacheOptions): MicrocacheHandler;
+  /** @experimental Fork-only. */
+  export type MicrocacheHandler = e.RequestHandler & {
+    /** Hits answered by uWS without running the chain. Informational. */
+    readonly nativeHits: number;
+  };
+
+  /** Fork-only. */
+  export interface ClusterOptions {
+    /**
+     * A positive integer, or `'auto'` (the default): the cores this process
+     * may run on, capped by its cgroup CPU quota rounded down, at least 1. On
+     * cgroup v2 the quota is the smallest `cpu.max` from the process's own
+     * cgroup up to the root; on v1, the root's. More workers than cores is a
+     * `'warning'`.
+     */
+    workers?: number | 'auto';
+  }
+  /** Fork-only. */
+  export interface ClusterCloseOptions {
+    /**
+     * Milliseconds. A worker still running after this long gets `SIGTERM`,
+     * and `SIGKILL` a second later if it is still running then. Without it
+     * `close()` waits for as long as they take. A later `close()` sets a
+     * deadline only where none is pending: one that is, its `SIGKILL`
+     * included, stays where it is, even for a shorter timeout.
+     */
+    timeout?: number;
+  }
+  /**
+   * Fork-only. What `express.cluster()` returns in the primary. It forks the
+   * workers, replaces every one that ends, and prints nothing: listen for the
+   * events.
+   */
+  export interface ClusterSupervisor extends NodeJS.EventEmitter {
+    /**
+     * Stops replacing workers and disconnects each of them. A worker ends once
+     * its app is closed: by the helper when the worker callback returned it,
+     * otherwise by the worker on its own `'disconnect'` event. `'close'`
+     * follows the last exit; `process.exit()` is never called.
+     */
+    close(callback?: () => void): this;
+    close(options: ClusterCloseOptions, callback?: () => void): this;
+
+    // Specific events first, the generic fallback last, as on Application.
+    /** A worker was forked, at startup or as a replacement. */
+    on(event: 'fork', listener: (worker: ClusterWorker) => void): this;
+    on(
+      event: 'exit',
+      listener: (
+        worker: ClusterWorker,
+        code: number | null,
+        signal: NodeJS.Signals | null,
+      ) => void,
+    ): this;
+    /**
+     * Stops nothing: the platform does not spread connections, there are more
+     * workers than cores, a worker could not be started, or a worker's
+     * channel failed. A fork that throws gives this alone, with no `'exit'`.
+     */
+    on(event: 'warning', listener: (warning: Error) => void): this;
+    /** `close()` was called and every worker has ended. */
+    on(event: 'close', listener: () => void): this;
+    on(event: string | symbol, listener: (...args: unknown[]) => void): this;
+    once(event: 'fork', listener: (worker: ClusterWorker) => void): this;
+    once(
+      event: 'exit',
+      listener: (
+        worker: ClusterWorker,
+        code: number | null,
+        signal: NodeJS.Signals | null,
+      ) => void,
+    ): this;
+    once(event: 'warning', listener: (warning: Error) => void): this;
+    once(event: 'close', listener: () => void): this;
+    once(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  }
+  /**
+   * Fork-only. What a worker callback may hand back for the helper to close:
+   * an app, or anything else with a `close()` method.
+   */
+  export interface ClusterClosable {
+    close(): unknown;
+  }
+  /**
+   * Fork-only. Runs in each worker: builds an app, listens, and returns the
+   * app, or an array of them, so that `supervisor.close()` can close it. One
+   * that returns nothing has to close its own app on the process's
+   * `'disconnect'` event. It may be `async`: what its promise resolves to is
+   * read as the return value, and one that rejects fails the way a sync one
+   * that throws does, with an uncaught exception that ends the worker, which
+   * is then replaced. Any other value throws a `TypeError` in the worker.
+   */
+  export type ClusterWorkerCallback = () =>
+    | ClusterWorkerResult
+    | PromiseLike<ClusterWorkerResult>;
+  /**
+   * Fork-only. What a worker callback returns, or what its promise resolves
+   * to. `null` is nothing, as `undefined` is.
+   */
+  export type ClusterWorkerResult =
+    // biome-ignore lint/suspicious/noConfusingVoidType: `undefined` here would refuse a function declared to return void
+    void | null | ClusterClosable | readonly ClusterClosable[];
+  /**
+   * Fork-only. Serves one port from several processes. The primary forks the
+   * workers and gets a supervisor; each worker runs `worker`, which builds an
+   * app, listens and returns it, and gets `undefined`. The helper installs no
+   * signal handler and leaves `express()` and `listen()` as they are.
+   */
+  export function cluster(
+    worker: ClusterWorkerCallback,
+  ): ClusterSupervisor | undefined;
+  export function cluster(
+    options: ClusterOptions,
+    worker: ClusterWorkerCallback,
+  ): ClusterSupervisor | undefined;
+
+  /** Fork-only. */
+  export interface ThreadsOptions {
+    /**
+     * A positive integer, or `'auto'` (the default): the cores this process
+     * may run on, capped by its cgroup CPU quota rounded down, at least 1, as
+     * for `express.cluster()`. The main thread only accepts and is not
+     * counted. More threads than cores is a `'warning'`.
+     */
+    workers?: number | 'auto';
+    /** For the acceptor. With TLS, the same ones the worker apps are built with. */
+    uwsOptions?: uws.AppOptions;
+  }
+  /** Fork-only. */
+  export interface ThreadsCloseOptions {
+    /**
+     * Milliseconds. A thread still running after this long is told to exit,
+     * which resets its connections, and is terminated a second later if it is
+     * too busy to; that aborts the process where the thread is stuck inside a
+     * request. Without it `close()` waits for as long as they take. A
+     * later `close()` sets a deadline only where none is pending:
+     * after a call that gave none, or once an earlier deadline has passed. A
+     * deadline that is still pending stays where it is, even for a shorter
+     * timeout.
+     */
+    timeout?: number;
+  }
+  /**
+   * Fork-only. What `express.threads()` returns on the main thread. It starts
+   * the worker threads, replaces every one that ends, holds the port they
+   * serve, and prints nothing: listen for the events.
+   */
+  export interface ThreadsSupervisor extends NodeJS.EventEmitter {
+    /**
+     * Binds the port once every thread has handed over its app, so that no
+     * connection is accepted before a thread can take it. A refused bind is an
+     * `'error'` event, as it is on an app.
+     */
+    listen(port?: number, hostname?: string, callback?: () => void): this;
+    listen(port?: number, callback?: () => void): this;
+    /** The acceptor's address, `null` until it is bound. */
+    address(): {address: string; family: string; port: number} | string | null;
+    /**
+     * Stops replacing threads, closes the listen socket and tells every thread
+     * to end, which it does once its open connections have and nothing else
+     * keeps it up. `'close'` follows
+     * the last exit; `process.exit()` is never called. A `listen()` after it
+     * throws.
+     */
+    close(callback?: () => void): this;
+    close(options: ThreadsCloseOptions, callback?: () => void): this;
+
+    // Specific events first, the generic fallback last, as on Application.
+    /** A thread was started, at startup or as a replacement. */
+    on(event: 'fork', listener: (worker: ThreadsWorker) => void): this;
+    on(
+      event: 'exit',
+      listener: (worker: ThreadsWorker, code: number) => void,
+    ): this;
+    /**
+     * Stops nothing: what a thread died of, an uncaught exception or a
+     * callback that returned no app; a thread that could not be started, which
+     * gives this alone, with no `'exit'`; or more threads than cores.
+     */
+    on(event: 'warning', listener: (warning: Error) => void): this;
+    on(event: 'listening', listener: () => void): this;
+    /** A failed bind. Thrown when nothing listens for it, as on an app. */
+    on(event: 'error', listener: (err: Error) => void): this;
+    /** `close()` was called and every thread has ended. */
+    on(event: 'close', listener: () => void): this;
+    on(event: string | symbol, listener: (...args: unknown[]) => void): this;
+    once(event: 'fork', listener: (worker: ThreadsWorker) => void): this;
+    once(
+      event: 'exit',
+      listener: (worker: ThreadsWorker, code: number) => void,
+    ): this;
+    once(event: 'warning', listener: (warning: Error) => void): this;
+    once(event: 'listening', listener: () => void): this;
+    once(event: 'error', listener: (err: Error) => void): this;
+    once(event: 'close', listener: () => void): this;
+    once(event: string | symbol, listener: (...args: unknown[]) => void): this;
+  }
+  /**
+   * Fork-only. What a worker callback hands back for the helper to serve: an
+   * app, which it takes the descriptor of, and closes as the thread ends.
+   */
+  export interface ThreadsServable {
+    getDescriptor(): uws.AppDescriptor;
+    readonly uwsApp: uws.TemplatedApp;
+  }
+  /**
+   * Fork-only. Runs in each worker thread: builds an app and returns it
+   * without calling `listen()`, since the main thread holds the port. It may
+   * be `async`: what its promise resolves to is read as the return value. One
+   * that returns no app, throws or rejects ends its thread with an uncaught
+   * exception, which is a `'warning'` on the supervisor, and the thread is
+   * then replaced.
+   */
+  export type ThreadsWorkerCallback = () =>
+    | ThreadsServable
+    | PromiseLike<ThreadsServable>;
+  /**
+   * Fork-only. Serves one port from several worker threads. The main thread
+   * starts the threads on the entry file and gets a supervisor, whose
+   * `listen()` binds the port; each thread runs `worker`, which builds an app
+   * and returns it, and gets `undefined`. The helper installs no signal
+   * handler.
+   */
+  export function threads(
+    worker: ThreadsWorkerCallback,
+  ): ThreadsSupervisor | undefined;
+  export function threads(
+    options: ThreadsOptions,
+    worker: ThreadsWorkerCallback,
+  ): ThreadsSupervisor | undefined;
 
   export import application = e.application;
   export import request = e.request;
@@ -179,9 +412,16 @@ declare namespace express {
       ) => this) &
       e.Application['use'];
 
-    close(cb?: () => void): this;
+    close(cb?: (err?: Error) => void): this;
     address(): {address: string; family: string; port: number} | string | null;
     readonly uwsApp: uws.TemplatedApp;
+
+    // Serving one port from several worker threads. A worker thread calls
+    // getDescriptor() in place of listen() and posts the result to the thread
+    // that listens, which registers it before its own listen().
+    getDescriptor(): uws.AppDescriptor;
+    addChildAppDescriptor(descriptor: uws.AppDescriptor): this;
+    removeChildAppDescriptor(descriptor: uws.AppDescriptor): this;
 
     enabled<T extends AppBuiltInBooleanSettings>(setting: T): boolean;
     disabled<T extends AppBuiltInBooleanSettings>(setting: T): boolean;
@@ -196,7 +436,8 @@ declare namespace express {
 
     // Typed events. listen() reports a failed bind asynchronously via an
     // 'error' event (an Error with a `.code`, e.g. EADDRINUSE) — not a sync
-    // throw and not the success callback — so consumers must `app.on('error', …)`.
+    // throw and not the success callback. With no 'error' listener it is thrown
+    // on the next tick, as net.Server does.
     // Express narrows `on`/`once` to only the 'mount' event, hiding the generic
     // EventEmitter API. We omit the emitter methods from the base above and
     // declare them explicitly here (specific 'error'/'mount' overloads first, a
